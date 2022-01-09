@@ -17,6 +17,7 @@ public class GutHubPullRequestMapper {
         return PullRequestDto.builder()
                 .id(pullRequest.getId())
                 .title(pullRequest.getTitle())
+                .url(pullRequest.getHtmlUrl().toString())
                 .sourceBranch(pullRequest.getHead().getRef())
                 .targetBranch(pullRequest.getBase().getRef())
                 .repositoryName(pullRequest.getRepository().getFullName())
