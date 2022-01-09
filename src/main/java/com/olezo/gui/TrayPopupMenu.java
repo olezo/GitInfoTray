@@ -23,13 +23,14 @@ public class TrayPopupMenu {
         var repositoriesMenu = new Menu(REPOSITORIES_LABEL);
         var repositoryMenuItem = new RepositoryMenuItem();
 
-        Map<Boolean, Map<String, List<RepositoryDto>>> positivePullRequestCountMapToOwnerLoginMap = repositories.stream()
+        Map<Boolean, Map<String, List<RepositoryDto>>> positivePullRequestCountMapToOwnerUserNameMap
+                = repositories.stream()
                 .collect(Collectors.partitioningBy(
                         repository -> repository.getPullRequestCount() > 0,
                         Collectors.groupingBy(RepositoryDto::getOwnerLogin)
                 ));
 
-        positivePullRequestCountMapToOwnerLoginMap.entrySet().stream()
+        positivePullRequestCountMapToOwnerUserNameMap.entrySet().stream()
                 // PR's with positive count goes first
                 .sorted(Map.Entry.comparingByKey((b1, b2) -> Boolean.compare(b2, b1)))
                 .forEachOrdered(key -> {
@@ -37,11 +38,14 @@ public class TrayPopupMenu {
                             // sort by owner login
                             .sorted(Map.Entry.comparingByKey())
                             .forEachOrdered((entry) -> {
+                                var ownerUserName = entry.getKey();
+                                var repositoryPullRequestsMenu = new Menu(ownerUserName);
+
                                 entry.getValue().stream()
                                         .map(repositoryMenuItem::getItem)
-                                        .forEach(repositoriesMenu::add);
+                                        .forEach(repositoryPullRequestsMenu::add);
 
-                                repositoriesMenu.addSeparator();
+                                repositoriesMenu.add(repositoryPullRequestsMenu);
                             });
 
                     repositoriesMenu.addSeparator();
