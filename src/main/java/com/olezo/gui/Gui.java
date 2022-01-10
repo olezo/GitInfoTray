@@ -46,6 +46,8 @@ public class Gui {
     }
 
     public void updateTrayMenu(String login, List<RepositoryDto> repositories) {
+        log.debug("Updating tray menu..");
+
         var popup = trayPopupMenu.getMenu(login, repositories);
 
         trayIcon.setPopupMenu(popup);

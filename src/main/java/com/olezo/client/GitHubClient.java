@@ -19,6 +19,9 @@ public class GitHubClient {
 
     private final GHMyself myAccount;
 
+    // TODO: Temporary cache
+    private final Collection<GHRepository> repositoriesCache = new ArrayList<>();
+
     public GitHubClient() {
         log.info("Connecting to GitHub...");
 
@@ -33,11 +36,15 @@ public class GitHubClient {
 
     @SneakyThrows
     public Collection<GHRepository> getRepositories() {
-        return myAccount.getAllRepositories().values();
+        Collection<GHRepository> repositories = myAccount.getAllRepositories().values();
+
+        updateCache(repositories);
+
+        return repositories;
     }
 
     public List<GHPullRequest> getPullRequests() {
-        return getRepositories().stream()
+        return repositoriesCache.stream()
                 .map(GHRepository::queryPullRequests)
                 .map(GHPullRequestQueryBuilder::list)
                 .flatMap(e -> StreamSupport.stream(e.spliterator(), true))
@@ -67,5 +74,10 @@ public class GitHubClient {
         }
 
         return value;
+    }
+
+    private void updateCache(Collection<GHRepository> repositories) {
+        repositoriesCache.clear();
+        repositoriesCache.addAll(repositories);
     }
 }
