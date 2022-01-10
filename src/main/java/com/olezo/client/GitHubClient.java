@@ -1,6 +1,7 @@
 package com.olezo.client;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.GHMyself;
 import org.kohsuke.github.GHPullRequest;
@@ -11,6 +12,7 @@ import org.kohsuke.github.GitHubBuilder;
 import java.util.*;
 import java.util.stream.*;
 
+@Slf4j
 public class GitHubClient {
     private static final String GITHUB_TOKEN_KEY = "GITHUB_TOKEN";
     private static final String TOKEN_MUST_BE_PROVIDED_MESSAGE = "Token must be provided";
@@ -40,11 +42,19 @@ public class GitHubClient {
 
     @SneakyThrows
     private GHMyself getMyAccount() {
-        String token = requiredNotBlank(System.getenv(GITHUB_TOKEN_KEY));
+        String token = requiredNotBlank(getEnvironmentVariableOrSystemProperty(GITHUB_TOKEN_KEY));
         return new GitHubBuilder()
                 .withAppInstallationToken(token)
                 .build()
                 .getMyself();
+    }
+
+    private String getEnvironmentVariableOrSystemProperty(String key) {
+        log.debug("Environment Variable {} is present: {}", key, StringUtils.isNoneBlank(System.getenv(key)));
+        log.debug("System Property {} is present: {}", key, StringUtils.isNoneBlank(System.getProperty(key)));
+
+        return Optional.ofNullable(System.getenv(key))
+                .orElse(System.getProperty(key));
     }
 
     private String requiredNotBlank(String value) {

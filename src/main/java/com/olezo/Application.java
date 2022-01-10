@@ -19,9 +19,11 @@ class Application {
     void run() {
         gui.displayLoadingTrayMenu();
 
-        log.debug("Scheduling tray menu update...");
+        log.info("Scheduling tray menu update...");
 
         scheduler.scheduleAtFixedRate(this::updateTrayMenuAndDisplayMessages, 0, 5, TimeUnit.SECONDS);
+
+        log.info("Tray menu update was scheduled");
     }
 
     @SneakyThrows

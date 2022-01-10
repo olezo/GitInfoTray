@@ -29,12 +29,6 @@ public class GitHubService {
         return gitHubRepositoryMapper.mapToDtos(repositories);
     }
 
-    public List<PullRequestDto> getPullRequests() {
-        var pullRequests = gitHubClient.getPullRequests();
-
-        return gutHubPullRequestMapper.mapToPullRequestDtos(pullRequests);
-    }
-
     public List<PullRequestDto> getNewPullRequests() {
         var pullRequests = getPullRequests();
 
@@ -47,6 +41,12 @@ public class GitHubService {
         repository.addPullRequestsIds(newPullRequestIds);
 
         return newPullRequests;
+    }
+
+    private List<PullRequestDto> getPullRequests() {
+        var pullRequests = gitHubClient.getPullRequests();
+
+        return gutHubPullRequestMapper.mapToPullRequestDtos(pullRequests);
     }
 
     private List<PullRequestDto> getNewPullRequests(List<PullRequestDto> pullRequests) {

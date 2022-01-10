@@ -7,7 +7,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RepositoryMenuItem {
+public class PullRequestMenuItem {
     private static final String SEPARATOR_LABEL = "-";
     private static final String OPEN_REPOSITORY_LABEL = "Open repository";
 
