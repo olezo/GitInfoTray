@@ -11,6 +11,9 @@ import java.util.concurrent.*;
 
 @Slf4j
 class Application {
+    private static final int UPDATE_PERIOD = 30;
+    private static final int INITIAL_DELAY = 0;
+
     private final Gui gui = Gui.getInstance();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final GitHubService gitHubService = new GitHubService();
@@ -21,7 +24,7 @@ class Application {
 
         log.info("Scheduling tray menu update...");
 
-        scheduler.scheduleAtFixedRate(this::updateTrayMenuAndDisplayMessages, 0, 5, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::updateTrayMenuAndDisplayMessages, INITIAL_DELAY, UPDATE_PERIOD, TimeUnit.SECONDS);
 
         log.info("Tray menu update was scheduled");
     }
