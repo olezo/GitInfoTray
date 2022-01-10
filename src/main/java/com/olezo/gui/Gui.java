@@ -1,6 +1,7 @@
 package com.olezo.gui;
 
 import com.olezo.dto.RepositoryDto;
+import com.olezo.util.ThrowingRunnable;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,8 +58,8 @@ public class Gui {
 
         trayIcon = getTrayIcon(trayImage);
 
-        SystemTray.getSystemTray().add(trayIcon);
-        Taskbar.getTaskbar().setIconImage(trayImage);
+        executeSilently(ThrowingRunnable.wrapper(() -> SystemTray.getSystemTray().add(trayIcon)));
+        executeSilently(() ->  Taskbar.getTaskbar().setIconImage(trayImage));
     }
 
     private TrayIcon getTrayIcon(Image trayImage) {
@@ -66,5 +67,14 @@ public class Gui {
         trayIcon.setImageAutoSize(true);
 
         return trayIcon;
+    }
+
+    private void executeSilently(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            log.warn("Failed to execute runnable", e);
+            log.warn("Proceeding silently");
+        }
     }
 }
