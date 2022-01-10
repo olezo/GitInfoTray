@@ -1,4 +1,5 @@
-import com.olezo.Starter;
+package com.olezo;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
