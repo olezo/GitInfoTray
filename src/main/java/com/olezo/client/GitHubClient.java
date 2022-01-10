@@ -20,7 +20,11 @@ public class GitHubClient {
     private final GHMyself myAccount;
 
     public GitHubClient() {
+        log.info("Connecting to GitHub...");
+
         myAccount = getMyAccount();
+
+        log.info("Connected");
     }
 
     public String getLogin() {

@@ -9,11 +9,13 @@ import java.util.stream.*;
 
 public class TrayPopupMenu {
     private static final String CLOSE_LABEL = "Close";
-    private static final String REPOSITORIES_LABEL = "Repositories";
+    private static final String ACCOUNTS_LABEL = "Accounts";
     private static final String NOTIFICATIONS_LABEL = "Notifications";
 
     private static final String NOTIFICATIONS_LINK = "https://github.com/notifications";
     private static final String GITHUB_LINK = "https://github.com/";
+
+    private final RepositoryMenu repositoryMenu = new RepositoryMenu();
 
     public PopupMenu getMenu(String login, List<RepositoryDto> repositories) {
         var accountItem = new MenuItem(login);
@@ -22,7 +24,7 @@ public class TrayPopupMenu {
         var notificationsItem = new MenuItem(NOTIFICATIONS_LABEL);
         notificationsItem.addActionListener(event -> BrowserUtil.open(NOTIFICATIONS_LINK));
 
-        var repositoriesMenu = buildRepositoriesMenu(repositories);
+        var accountsMenu = buildAccountsMenu(repositories);
 
         var closeItem = new MenuItem(CLOSE_LABEL);
         closeItem.addActionListener(event -> System.exit(0));
@@ -31,47 +33,46 @@ public class TrayPopupMenu {
         popup.add(accountItem);
         popup.addSeparator();
         popup.add(notificationsItem);
-        popup.add(repositoriesMenu);
+        popup.add(accountsMenu);
         popup.add(closeItem);
 
         return popup;
     }
 
-    private Menu buildRepositoriesMenu(List<RepositoryDto> repositories) {
-        var repositoriesMenu = new Menu(REPOSITORIES_LABEL);
-        var pullRequestMenuItem = new PullRequestMenuItem();
+    private Menu buildAccountsMenu(List<RepositoryDto> repositories) {
+        var accountsMenu = new Menu(ACCOUNTS_LABEL);
 
-        var positivePullRequestCountMapToOwnerUserNameMap = repositories.stream()
+        var partitionedAccountsToRepositoriesMap = repositories.stream()
                 .collect(Collectors.partitioningBy(
                         repository -> repository.getPullRequestCount() > 0,
                         Collectors.groupingBy(RepositoryDto::getOwnerLogin)
                 ));
 
-        var usernameToRepositoriesWithPullRequestsMap = positivePullRequestCountMapToOwnerUserNameMap.get(Boolean.TRUE);
-        var usernameToRepositoriesWithoutPullRequestsMap = positivePullRequestCountMapToOwnerUserNameMap.get(Boolean.FALSE);
+        var accountWithPulRequestsToRepositoriesMap = partitionedAccountsToRepositoriesMap.get(Boolean.TRUE);
+        var accountWithoutPulRequestsToRepositoriesMap = partitionedAccountsToRepositoriesMap.get(Boolean.FALSE);
 
-        var repositoriesWithPullRequestsMenus = buildRepositoryMenuItem(pullRequestMenuItem, usernameToRepositoriesWithPullRequestsMap);
-        var repositoriesWithoutPullRequestsMenus = buildRepositoryMenuItem(pullRequestMenuItem, usernameToRepositoriesWithoutPullRequestsMap);
+        var accountsWithPullRequestsMenus = buildAccountMenuItems(accountWithPulRequestsToRepositoriesMap);
+        var accountsWithoutPullRequestsMenus = buildAccountMenuItems(accountWithoutPulRequestsToRepositoriesMap);
 
-        repositoriesWithPullRequestsMenus.forEach(repositoriesMenu::add);
-        repositoriesMenu.addSeparator();
-        repositoriesWithoutPullRequestsMenus.forEach(repositoriesMenu::add);
+        accountsWithPullRequestsMenus.forEach(accountsMenu::add);
+        accountsMenu.addSeparator();
+        accountsWithoutPullRequestsMenus.forEach(accountsMenu::add);
 
-        return repositoriesMenu;
+        return accountsMenu;
     }
 
-    private List<Menu> buildRepositoryMenuItem(PullRequestMenuItem pullRequestMenuItem, Map<String, List<RepositoryDto>> usernameToRepositoryMap) {
-        return usernameToRepositoryMap.entrySet().stream()
+    private List<Menu> buildAccountMenuItems(Map<String, List<RepositoryDto>> accountToRepositoryMap) {
+        return accountToRepositoryMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map((entry) -> {
-                    var ownerUsername = entry.getKey();
-                    var repositoryPullRequestsMenu = new Menu(ownerUsername);
+                    var username = entry.getKey();
+                    var accountMenuItem = new Menu(username);
 
                     entry.getValue().stream()
-                            .map(pullRequestMenuItem::getItem)
-                            .forEach(repositoryPullRequestsMenu::add);
+                            .map(repositoryMenu::getItem)
+                            .forEach(accountMenuItem::add);
 
-                    return repositoryPullRequestsMenu;
+                    return accountMenuItem;
                 })
                 .toList();
     }

@@ -7,24 +7,24 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PullRequestMenuItem {
+public class RepositoryMenu {
     private static final String SEPARATOR_LABEL = "-";
     private static final String OPEN_REPOSITORY_LABEL = "Open repository";
 
     public MenuItem getItem(RepositoryDto repository) {
-        var repositoryName = getRepositoryName(repository);
-        var repositoryMenu = new Menu(repositoryName);
+        var repositoryMenuItem = new Menu(getRepositoryName(repository));
 
-        MenuItem openRepositoryLabel = new MenuItem(OPEN_REPOSITORY_LABEL);
-        openRepositoryLabel.addActionListener(event ->
+        var openRepositoryItem = new MenuItem(OPEN_REPOSITORY_LABEL);
+        openRepositoryItem.addActionListener(event ->
                 BrowserUtil.open(repository.getRepositoryUrl())
         );
 
-        repositoryMenu.add(openRepositoryLabel);
+        var pullRequestMenuItems = createPullRequestMenuItems(repository.getPullRequests());
 
-        createPullRequestMenuItems(repository).forEach(repositoryMenu::add);
+        repositoryMenuItem.add(openRepositoryItem);
+        pullRequestMenuItems.forEach(repositoryMenuItem::add);
 
-        return repositoryMenu;
+        return repositoryMenuItem;
     }
 
     private String getRepositoryName(RepositoryDto repository) {
@@ -33,15 +33,15 @@ public class PullRequestMenuItem {
                 : repository.getName();
     }
 
-    private List<MenuItem> createPullRequestMenuItems(RepositoryDto repository) {
-        if (repository.getPullRequestCount() == 0) {
+    private List<MenuItem> createPullRequestMenuItems(List<PullRequestDto> pullRequests) {
+        if (pullRequests.isEmpty()) {
             return List.of();
         }
 
         var pullRequestMeuItems = new ArrayList<MenuItem>();
         pullRequestMeuItems.add(new MenuItem(SEPARATOR_LABEL));
 
-        repository.getPullRequests().stream()
+        pullRequests.stream()
                 .map(this::createPullRequestMenuItem)
                 .forEach(pullRequestMeuItems::add);
 
